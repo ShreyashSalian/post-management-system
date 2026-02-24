@@ -8,7 +8,7 @@ new Worker(
     const { name, data } = job;
     switch (name) {
       case "FORGOT_PASSWORD":
-        await forgotPasswordMail(data?.token, data?.email);
+        await forgotPasswordMail(data?.email, data?.otp);
         break;
       case "VERIFY_EMAIL":
         await verifyEmail(data?.email, data.token);

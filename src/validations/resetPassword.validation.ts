@@ -3,6 +3,15 @@ import { trimInput } from "../utils/function";
 
 export const resetPasswordValidation = () => {
   return checkSchema({
+    email: {
+      trim: true,
+      isEmail: {
+        errorMessage: "Please enter the valid email",
+      },
+      notEmpty: {
+        errorMessage: "Please enter the email",
+      },
+    },
     otp: {
       trim: true,
       notEmpty: {

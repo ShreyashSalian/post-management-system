@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import {
   asyncHandler,
   CustomRequestWithFile,
+  deleteFromCloudinary,
   generateEmailVerificationToken,
   generateOtp,
   rolePermission,
@@ -21,7 +22,7 @@ import { uploadSingleImage } from "../utils/cloudinarySingleFileUpload";
 import { emailQueue } from "../utils/queue/email.queue";
 
 /* =====================================================
-   GET LOGIN USER DETAIL
+   GET => LOGIN USER DETAIL
 ===================================================== */
 export const getLoginUserDetail = asyncHandler(
   async (
@@ -61,9 +62,8 @@ export const getLoginUserDetail = asyncHandler(
 );
 
 /* =====================================================
-   REGISTER USER
+  POST => REGISTER USER
 ===================================================== */
-
 export const addNewUser = asyncHandler(
   async (
     req: express.Request,
@@ -115,7 +115,7 @@ export const addNewUser = asyncHandler(
       } else {
         newPermission = rolePermission.admin;
       }
-      let profileImage = {};
+      let profileImage;
       if (customRequest.file) {
         profileImage = await uploadSingleImage(customRequest.file);
       }
@@ -173,9 +173,8 @@ export const addNewUser = asyncHandler(
 );
 
 /* =====================================================
-   GENERATE ACCESS TOKEN
+  GET => GENERATE ACCESS TOKEN
 ===================================================== */
-
 export const generateAccessToken = asyncHandler(
   async (
     req: express.Request<{}, {}, { refreshToken: string }>,
@@ -259,7 +258,7 @@ export const generateAccessToken = asyncHandler(
 );
 
 /* =====================================================
-   CHANGE PASSWORD 
+  POST => CHANGE PASSWORD 
 ===================================================== */
 export const changePassword = asyncHandler(
   async (
@@ -307,7 +306,7 @@ export const changePassword = asyncHandler(
 );
 
 /* =====================================================
-   FORGOT PASSWORD
+  POST => FORGOT PASSWORD
 ===================================================== */
 export const forgotPassword = asyncHandler(
   async (
@@ -338,9 +337,10 @@ export const forgotPassword = asyncHandler(
       await user.save();
       // await forgotPasswordMail(token, user?.email);
       //Push job to queue
+
       await emailQueue.add("FORGOT_PASSWORD", {
         email: user.email,
-        hashedOtp,
+        otp: otp,
       });
       return sendSuccess(
         res,
@@ -360,11 +360,9 @@ export const forgotPassword = asyncHandler(
     }
   },
 );
-
 /* =====================================================
-   RESET PASSWORD
+  POST => RESET PASSWORD
 ===================================================== */
-
 export const resetPassword = asyncHandler(
   async (
     req: express.Request<
@@ -438,7 +436,7 @@ export const resetPassword = asyncHandler(
 );
 
 /* =====================================================
-   EMAIL VERIFICATION
+  POST => EMAIL VERIFICATION
 ===================================================== */
 export const userEmailVerification = asyncHandler(
   async (
@@ -471,6 +469,118 @@ export const userEmailVerification = asyncHandler(
       );
     } catch (err: any) {
       console.log(`Error in the login user detail api ${err}`);
+      return sendError(
+        res,
+        CONSTANT_LIST.STATUS_ERROR,
+        CONSTANT_LIST.INTERNAL_SERVER_ERROR,
+        CONSTANT_LIST.INTERNAL_SERVER_ERROR_MESSAGE,
+      );
+    }
+  },
+);
+
+/* =====================================================
+  POST => ADD PROFILE IMAGE
+===================================================== */
+export const addProfileImage = asyncHandler(
+  async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<express.Response> => {
+    try {
+      const customRequest = req as CustomRequestWithFile;
+      const userId = req.user?.userId;
+      if (!customRequest.file) {
+        return sendError(
+          res,
+          CONSTANT_LIST.STATUS_ERROR,
+          CONSTANT_LIST.BAD_REQUEST,
+          "Profile image is required",
+        );
+      }
+
+      const user = await UserModel.findById(userId);
+
+      if (!user) {
+        return sendError(
+          res,
+          CONSTANT_LIST.STATUS_ERROR,
+          CONSTANT_LIST.NO_DATA_FOUND,
+          "User not found",
+        );
+      }
+      // ✅ 1. Upload new image FIRST (important)
+      const uploadedImage = await uploadSingleImage(customRequest.file);
+      // Should return { url, publicId }
+
+      // ✅ 2. Delete old image AFTER successful upload
+      if (user.profileImage?.publicId) {
+        await deleteFromCloudinary(user.profileImage.publicId);
+      }
+      user.profileImage = {
+        url: uploadedImage.url,
+        publicId: uploadedImage.publicId,
+      };
+
+      await user.save();
+      return sendSuccess(
+        res,
+        CONSTANT_LIST.STATUS_SUCCESS,
+        CONSTANT_LIST.STATUS_CODE_OK,
+        "Profile image updated successfully",
+        user,
+      );
+    } catch (err: any) {
+      console.log(`Error in the add profile image api ${err}`);
+      return sendError(
+        res,
+        CONSTANT_LIST.STATUS_ERROR,
+        CONSTANT_LIST.INTERNAL_SERVER_ERROR,
+        CONSTANT_LIST.INTERNAL_SERVER_ERROR_MESSAGE,
+      );
+    }
+  },
+);
+
+/* =====================================================
+  POST => DELETE THE PROFILE IMAGE
+===================================================== */
+export const deleteProfileImage = asyncHandler(
+  async (
+    req: express.Request,
+    res: express.Response,
+  ): Promise<express.Response> => {
+    try {
+      const userId = req.user?.userId;
+
+      const user = await UserModel.findById(userId);
+
+      if (!user?.profileImage?.publicId) {
+        return sendError(
+          res,
+          CONSTANT_LIST.STATUS_ERROR,
+          CONSTANT_LIST.BAD_REQUEST,
+          "No profile Image found to delete",
+        );
+      }
+
+      await deleteFromCloudinary(user.profileImage.publicId);
+
+      user.profileImage = {
+        url: null,
+        publicId: null,
+      };
+      await user.save();
+
+      return sendSuccess(
+        res,
+        CONSTANT_LIST.STATUS_SUCCESS,
+        CONSTANT_LIST.STATUS_CODE_OK,
+        "The profile image has been deleted",
+        user,
+      );
+    } catch (err: any) {
+      console.log(`Error in the delete profile image api ${err}`);
       return sendError(
         res,
         CONSTANT_LIST.STATUS_ERROR,

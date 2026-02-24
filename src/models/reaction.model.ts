@@ -4,6 +4,7 @@ interface reactionDocument extends Document {
   postId: Types.ObjectId;
   userId: Types.ObjectId;
   type: string;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +29,10 @@ const reactionSchema = new Schema<reactionDocument>(
       type: String,
       enum: Object.values(REACTION_TYPE),
       required: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

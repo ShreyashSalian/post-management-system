@@ -3,8 +3,9 @@ import mongoose, { Types, Document, Schema, mongo } from "mongoose";
 interface commentDocument extends Document {
   postId: Types.ObjectId;
   userId: Types.ObjectId;
-  parentComment: Types.ObjectId;
+  parentComment?: Types.ObjectId | null;
   description: string;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +30,10 @@ const commentSchema = new Schema<commentDocument>(
     description: {
       type: String,
       required: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

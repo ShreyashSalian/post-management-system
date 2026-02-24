@@ -1,6 +1,7 @@
 import express from "express";
 import crypto from "crypto";
 import fs from "fs";
+import cloudinary from "../config/cloudinary.config";
 export function asyncHandler<
   P = {},
   ResBody = any,
@@ -136,4 +137,10 @@ export const generateEmailVerificationToken = () => {
 };
 export const generateOtp = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+export const deleteFromCloudinary = async (publicId: string) => {
+  if (!publicId) return;
+
+  await cloudinary.uploader.destroy(publicId);
 };

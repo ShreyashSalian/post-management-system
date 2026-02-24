@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb-container
+    restart: always
+    volumes:
+      - data:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build:
+      context: . # Use `.` since `Dockerfile` is in the same directory
+      dockerfile: Dockerfile # Ensure `Dockerfile` exists
+    image: backend-image
+    container_name: backend_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - node_modules:/app/node_modules # Persist node_modules
+      - .:/app # Sync current folder with container
+    restart: always
+    env_file:
+      - .env # Load environment variables
+    depends_on:
+      - mongodb
+
+volumes:
+  data: # Corrected volume definition
+  node_modules: # Added volume for node_modules

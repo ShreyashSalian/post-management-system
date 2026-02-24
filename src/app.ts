@@ -6,6 +6,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import i18n from "./config/i18n";
 import morgan from "morgan";
+import indexRouter from "./routes/index.routes";
 
 const app = express();
 app.use(
@@ -28,6 +29,7 @@ app.use("/images", express.static("/public/images"));
 app.set("view engine", "hbs");
 app.set("views", "./src/views");
 
+app.use(indexRouter);
 // Error handler (must be last)
 
 export default app;

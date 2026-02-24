@@ -4,6 +4,7 @@ import { trimInput } from "../utils/function";
 export const changePasswordValidation = () => {
   return checkSchema({
     oldPassword: {
+      trim: true,
       notEmpty: {
         errorMessage: "Please enter the old password.",
       },
@@ -12,11 +13,9 @@ export const changePasswordValidation = () => {
         errorMessage:
           "Old Password must be at least 6 characters long, including a number and a special character.",
       },
-      customSanitizer: {
-        options: trimInput,
-      },
     },
     NewPassword: {
+      trim: true,
       notEmpty: {
         errorMessage: "Please enter the new password.",
       },
@@ -24,9 +23,6 @@ export const changePasswordValidation = () => {
         options: [/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,}$/],
         errorMessage:
           "New Password must be at least 6 characters long, including a number and a special character.",
-      },
-      customSanitizer: {
-        options: trimInput,
       },
     },
   });

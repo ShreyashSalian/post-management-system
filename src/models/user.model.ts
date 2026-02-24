@@ -1,40 +1,69 @@
-import mongoose, { Types, Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, Model } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-interface userDocument extends Document {
+/* =====================================================
+   INTERFACE
+===================================================== */
+
+export interface userDocument extends Document {
   userName: string;
   firstName: string;
   lastName: string;
   email: string;
   password: string;
-  role: string;
+  role: "user" | "admin" | "manager";
   contactNumber: string;
   failedLoginAttempts: number;
   lockUntil?: Date | null;
   isDeleted: boolean;
   createdAt: Date;
+  updatedAt: Date;
+
   profileImage: {
     url: string | null;
     publicId: string | null;
   };
-  updatedAt: Date;
+
   permission: string[];
+
   refreshToken?: string;
-  resetPasswordToken?: string;
-  resetPasswordTokenExpiry?: Date;
+  resetPasswordOtp?: string;
+  resetPasswordOtpExpiry?: Date;
+
   isEmailVerified: boolean;
-  emailVerificationToken: string | null;
+  emailVerificationToken?: string | null;
+
   comparePassword(password: string): Promise<boolean>;
   generateAccessToken(): string;
   generateRefreshToken(): string;
 }
 
-enum USER_ROLE {
+/* =====================================================
+   IMAGE SUB-SCHEMA (Reusable)
+===================================================== */
+
+const imageSchema = new Schema(
+  {
+    url: { type: String, default: null },
+    publicId: { type: String, default: null },
+  },
+  { _id: false },
+);
+
+/* =====================================================
+   USER ROLE ENUM
+===================================================== */
+
+export enum USER_ROLE {
   USER = "user",
   ADMIN = "admin",
   MANAGER = "manager",
 }
+
+/* =====================================================
+   MAIN USER SCHEMA
+===================================================== */
 
 const userSchema = new Schema<userDocument>(
   {
@@ -42,80 +71,95 @@ const userSchema = new Schema<userDocument>(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
+
     firstName: {
       type: String,
       required: true,
+      trim: true,
     },
+
     lastName: {
       type: String,
       required: true,
+      trim: true,
     },
+
     email: {
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
     },
+
     contactNumber: {
       type: String,
       required: true,
     },
-    isDeleted: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    failedLoginAttempts: {
-      type: Number,
-      default: 0,
-    },
+
     password: {
       type: String,
       required: true,
+      minlength: 6,
+      select: false, // do not return password by default
     },
-    lockUntil: {
-      type: Date,
-      default: null,
-    },
+
     role: {
       type: String,
       enum: Object.values(USER_ROLE),
       default: USER_ROLE.USER,
     },
+
     permission: {
       type: [String],
       default: [],
     },
-    profileImage: {
-      url: {
-        type: String,
-        // required: true,
-        default: null,
-      },
-      publicId: {
-        type: String,
-        default: null,
-        // required: true,
-      },
+
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
     },
+
+    lockUntil: {
+      type: Date,
+      default: null,
+    },
+
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    profileImage: {
+      type: imageSchema,
+      default: () => ({}), // Always object, never null
+    },
+
     refreshToken: {
       type: String,
+      select: false,
     },
-    resetPasswordToken: {
+    resetPasswordOtp: {
       type: String,
+      select: false,
     },
-    resetPasswordTokenExpiry: {
+
+    resetPasswordOtpExpiry: {
       type: Date,
     },
+
     isEmailVerified: {
       type: Boolean,
       default: false,
     },
+
     emailVerificationToken: {
       type: String,
+      default: null,
     },
   },
-
   {
     timestamps: true,
   },

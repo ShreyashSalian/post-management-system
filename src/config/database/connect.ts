@@ -1,0 +1,19 @@
+import mongoose from "mongoose";
+import { addAdminUser } from "../../utils/addAdmin";
+
+export const connectDB = async (): Promise<void> => {
+  try {
+    const DB =
+      process.env.NODE_ENV === "development"
+        ? `${process.env.LOCAL_PATH}/${process.env.DATABASE}`
+        : `${process.env.LIVE_PATH}/${process.env.DATABASE}`;
+    const connection = await mongoose.connect(DB);
+    addAdminUser();
+    console.log(
+      `The server is connected to the: ${connection.connection.host} database`,
+    );
+  } catch (err: any) {
+    console.log(`Error while connecting to mongodb database : ${err}`);
+    process.exit(1);
+  }
+};

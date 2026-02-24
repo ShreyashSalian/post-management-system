@@ -6,8 +6,8 @@ import { transporter } from "../config/mail";
 const APP_URL = "http://localhost:5173";
 
 const forgotPasswordMail = async (
-  token: string,
   email: string,
+  otp: string,
 ): Promise<void> => {
   try {
     const templatePath = path.join(
@@ -19,13 +19,13 @@ const forgotPasswordMail = async (
     const template = handlebars.compile(source);
 
     const html = template({
-      urlorcode: `${APP_URL}/${token}`,
+      otp, //pass otp
     });
 
     await transporter.sendMail({
       from: `"Support" <${process.env.GMAIL_USER}>`,
       to: email,
-      subject: "Reset your password",
+      subject: "Reset your password - OTP",
       html,
     });
   } catch (err) {

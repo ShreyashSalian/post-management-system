@@ -9,6 +9,9 @@ import { LoginBody } from "../helpers/user.helper";
 import { CONSTANT_LIST } from "../constants/global.constants";
 import { LoginModel } from "../models/login.model";
 
+/* =====================================================
+   GENERATE ACCESS AND REFRESH TOKEN
+===================================================== */
 export const generateAccessAndRefreshToken = async (
   userId: Types.ObjectId,
 ): Promise<{ accessToken: string; refreshToken: string }> => {
@@ -21,6 +24,9 @@ export const generateAccessAndRefreshToken = async (
   return { accessToken, refreshToken };
 };
 
+/* =====================================================
+  POST => ALLOW USER TO LOGIN
+===================================================== */
 export const login = asyncHandler(
   async (
     req: express.Request<{}, {}, LoginBody>,
@@ -152,6 +158,9 @@ export const login = asyncHandler(
     }
   },
 );
+/* =====================================================
+  GET => ALLOW USER TO LOGOUT
+===================================================== */
 export const logout = asyncHandler(
   async (
     req: express.Request<{}, {}, { deviceId: string }>,

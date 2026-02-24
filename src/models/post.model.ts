@@ -1,11 +1,18 @@
-import mongoose, { Types, Document, Schema, mongo } from "mongoose";
+import mongoose, { Types, Document, Schema } from "mongoose";
+
+interface MediaType {
+  url: string;
+  publicId: string;
+}
 
 interface postDocument extends Document {
   userId: Types.ObjectId;
   caption: string;
-  media: string[];
+  media: MediaType[];
   likeCount: number;
   disLikeCount: number;
+  commentCount: number;
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,14 +22,15 @@ const postSchema = new Schema<postDocument>(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     caption: {
       type: String,
     },
     media: [
       {
-        type: String,
-        required: true,
+        url: { type: String, required: true },
+        publicId: { type: String, required: true },
       },
     ],
     likeCount: {
@@ -32,6 +40,14 @@ const postSchema = new Schema<postDocument>(
     disLikeCount: {
       type: Number,
       default: 0,
+    },
+    commentCount: {
+      type: Number,
+      default: 0,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

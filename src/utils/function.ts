@@ -134,3 +134,6 @@ export const rolePermission = {
 export const generateEmailVerificationToken = () => {
   return crypto.randomBytes(32).toString("hex");
 };
+export const generateOtp = (): string => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};

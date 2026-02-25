@@ -7,12 +7,12 @@ export const commentValidation = () => {
         errorMessage: "Please select the post.",
       },
     },
-    parentComment: {
-      trim: true,
-      notEmpty: {
-        errorMessage: "Please select the comment.",
-      },
-    },
+    // parentComment: {
+    //   trim: true,
+    //   notEmpty: {
+    //     errorMessage: "Please select the comment.",
+    //   },
+    // },
     description: {
       trim: true,
       notEmpty: {

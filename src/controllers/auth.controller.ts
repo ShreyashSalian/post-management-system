@@ -37,6 +37,7 @@ export const login = asyncHandler(
       const LOCK_TIME = 5 * 60 * 1000; //5 MINUTES
       const MAX_DEVICES = 3;
       const { userNameOrEmail, password } = req.body;
+      console.log(userNameOrEmail, "---------------------------", password);
       const user = await UserModel.findOne({
         $or: [
           {

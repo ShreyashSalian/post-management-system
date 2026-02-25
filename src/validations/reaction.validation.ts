@@ -7,12 +7,12 @@ export const reactionValidation = () => {
         errorMessage: "Please select the post.",
       },
     },
-    userId: {
-      trim: true,
-      notEmpty: {
-        errorMessage: "Please select the user.",
-      },
-    },
+    // userId: {
+    //   trim: true,
+    //   notEmpty: {
+    //     errorMessage: "Please select the user.",
+    //   },
+    // },
     type: {
       trim: true,
       notEmpty: {

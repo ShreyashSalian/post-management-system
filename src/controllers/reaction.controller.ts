@@ -51,15 +51,15 @@ export const addReaction = asyncHandler(
       // CASE 2: Same reaction clicked again
       // ===================================
       else if (existingReaction.type === type) {
-        await existingReaction.deleteOne();
+        // await existingReaction.deleteOne();
         // if (type === "LIKE") {
         //   post.likeCount -= 1;
         // } else {
         //   post.disLikeCount -= 1;
         // }
-        await PostModel.findByIdAndUpdate(postObjectId, {
-          $inc: type === "LIKE" ? { likeCount: -1 } : { disLikeCount: -1 },
-        });
+        // await PostModel.findByIdAndUpdate(postObjectId, {
+        //   $inc: type === "LIKE" ? { likeCount: -1 } : { disLikeCount: -1 },
+        // });
       }
       // =====================================
       // CASE 3: Switching reaction
@@ -79,7 +79,9 @@ export const addReaction = asyncHandler(
             _id: existingReaction._id,
           },
           {
-            type,
+            $set: {
+              type,
+            },
           },
         );
         if (type === "LIKE") {

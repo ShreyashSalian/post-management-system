@@ -25,7 +25,8 @@ const commentSchema = new Schema<commentDocument>(
     parentComment: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Comment",
-      required: true,
+      default: null,
+      // required: true,
     },
     description: {
       type: String,
@@ -40,6 +41,8 @@ const commentSchema = new Schema<commentDocument>(
     timestamps: true,
   },
 );
+commentSchema.index({ postId: 1, parentComment: 1 });
+commentSchema.index({ createdAt: -1 });
 export const CommentModel = mongoose.model<commentDocument>(
   "Comment",
   commentSchema,

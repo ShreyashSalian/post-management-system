@@ -41,7 +41,7 @@ export const addComment = asyncHandler(
         const parentExist = await CommentModel.findOne({
           _id: parentObjectId,
           postId: postObjectId,
-          isActive: true,
+          isDeleted: false,
         });
         if (!parentExist) {
           return sendError(
@@ -112,19 +112,46 @@ export const updateComment = asyncHandler(
         );
       }
       const userId = req.user?.userId;
+      const userDetail = await UserModel.findById(userId);
       const commentObjectId = new mongoose.Types.ObjectId(commentId);
+
+      const comment = await CommentModel.findOne({
+        _id: commentObjectId,
+        userId,
+        isDeleted: false,
+      });
+      if (!comment) {
+        return sendError(
+          res,
+          CONSTANT_LIST.STATUS_ERROR,
+          CONSTANT_LIST.BAD_REQUEST,
+          "Comment not found or unauthorized",
+        );
+      }
+
+      if (
+        comment?.userId.toString() !== userId?.toString() &&
+        userDetail?.role !== "admin"
+      ) {
+        return sendError(
+          res,
+          CONSTANT_LIST.STATUS_ERROR,
+          CONSTANT_LIST.BAD_REQUEST,
+          "Comment not found or unauthorized",
+        );
+      }
+
       const commentUpdation = await CommentModel.findOneAndUpdate(
         {
           _id: commentObjectId,
-          userId: userId, //Ownership
+          userId: userId,
           isDeleted: false,
-          $set: {
-            description,
-          },
+        },
+        {
+          $set: { description },
         },
         { new: true },
       );
-
       if (commentUpdation) {
         return sendSuccess(
           res,
@@ -180,7 +207,7 @@ export const deleteComment = asyncHandler(
         );
       }
       if (
-        comment?.userId.toString() !== userId?.toString() ||
+        comment?.userId.toString() !== userId?.toString() &&
         userDetail?.role !== "admin"
       ) {
         return sendError(
@@ -194,7 +221,7 @@ export const deleteComment = asyncHandler(
 
       const commentDeletion = await CommentModel.findByIdAndUpdate(
         {
-          commentId,
+          commentObjectId,
           $set: {
             isDeleted: true,
           },

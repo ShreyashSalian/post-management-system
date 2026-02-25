@@ -15,7 +15,7 @@ export const postValidation = () => {
     caption: {
       trim: true,
       notEmpty: {
-        errorMessage: "Please enter the email or userName.",
+        errorMessage: "Please enter the caption for the media.",
       },
     },
     media: {

@@ -3,6 +3,7 @@ import mongoose, { Types, Document, Schema } from "mongoose";
 interface MediaType {
   url: string;
   publicId: string;
+  resourceType: string;
 }
 
 interface postDocument extends Document {
@@ -31,6 +32,10 @@ const postSchema = new Schema<postDocument>(
       {
         url: { type: String, required: true },
         publicId: { type: String, required: true },
+        resourceType: {
+          type: String,
+          required: true,
+        },
       },
     ],
     likeCount: {
@@ -54,5 +59,6 @@ const postSchema = new Schema<postDocument>(
     timestamps: true,
   },
 );
+postSchema.index({ caption: "text" });
 
 export const PostModel = mongoose.model<postDocument>("Post", postSchema);

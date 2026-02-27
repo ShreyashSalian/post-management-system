@@ -51,6 +51,13 @@ export const addReaction = asyncHandler(
       // CASE 2: Same reaction clicked again
       // ===================================
       else if (existingReaction.type === type) {
+        return sendSuccess(
+          res,
+          CONSTANT_LIST.STATUS_SUCCESS,
+          CONSTANT_LIST.STATUS_CODE_CREATED,
+          `You have already ${type} this post`,
+          null,
+        );
         // await existingReaction.deleteOne();
         // if (type === "LIKE") {
         //   post.likeCount -= 1;

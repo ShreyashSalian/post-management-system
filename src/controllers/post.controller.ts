@@ -13,6 +13,7 @@ import mongoose from "mongoose";
 import { CommentModel } from "../models/comment.model";
 import { ReactionModel } from "../models/reaction.model";
 import cloudinary from "../config/cloudinary.config";
+import redisClient from "../config/red.is";
 
 /* =====================================================
   POST => ALLOW USER TO ADD POST
@@ -52,6 +53,11 @@ export const addPost = asyncHandler(
         caption,
         media,
       });
+      ///To destroy the cache
+      const keys = await redisClient.keys("posts:*");
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+      }
       return sendSuccess(
         res,
         CONSTANT_LIST.STATUS_SUCCESS,
@@ -92,6 +98,21 @@ export const listAllPost = asyncHandler(
         matchStage.$text = { $search: search };
       }
 
+      //Create unique cache key
+      const cacheKey = `posts:${page}:${limit}:${sortBy}:${sortOrder}:${search || ""}`;
+
+      //1. Check Redis cache
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        return sendSuccess(
+          res,
+          CONSTANT_LIST.STATUS_SUCCESS,
+          CONSTANT_LIST.STATUS_CODE_OK,
+          "Post list (from cache)",
+          JSON.parse(cachedData),
+        );
+      }
+      //DB all(only if cache miss)
       const posts = await PostModel.aggregate([
         { $match: matchStage },
 
@@ -196,23 +217,29 @@ export const listAllPost = asyncHandler(
           CONSTANT_LIST.NO_DATA_FOUND,
           "Sorry, no post found.",
         );
-      } else {
-        return sendSuccess(
-          res,
-          CONSTANT_LIST.STATUS_SUCCESS,
-          CONSTANT_LIST.STATUS_CODE_OK,
-          "The Post list",
-          {
-            posts,
-            pagination: {
-              totalRecord: total,
-              currentPage: page,
-              totalPages: Math.ceil(total / limit),
-              pageSize: limit,
-            },
-          },
-        );
       }
+      const responseData = {
+        posts,
+        pagination: {
+          totalRecord: total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+          pageSize: limit,
+        },
+      };
+      //2. Store in Redis(TTL =  5 minutes)
+      await redisClient.setEx(
+        cacheKey,
+        300, //seconds
+        JSON.stringify(responseData),
+      );
+      return sendSuccess(
+        res,
+        CONSTANT_LIST.STATUS_SUCCESS,
+        CONSTANT_LIST.STATUS_CODE_OK,
+        "The Post list",
+        responseData,
+      );
     } catch (err: any) {
       console.log(`Error in the post listing api:${err}`);
       return sendError(
@@ -571,6 +598,11 @@ export const deletePost = asyncHandler(
           },
         },
       );
+      //To destroy the cache
+      const keys = await redisClient.keys("posts:*");
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+      }
       return sendSuccess(
         res,
         CONSTANT_LIST.STATUS_SUCCESS,
@@ -635,6 +667,11 @@ export const updatePost = asyncHandler(
           new: true,
         },
       );
+      //To destroy the cache
+      const keys = await redisClient.keys("posts:*");
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+      }
       if (updatePostDetail) {
         return sendSuccess(
           res,

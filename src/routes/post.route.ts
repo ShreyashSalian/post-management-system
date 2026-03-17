@@ -69,3 +69,5 @@ postRouter.post("/delete-media/:postId", verifyUser, deletePostImage);
    UPDATE THE POST
 ===================================================== */
 postRouter.post("/upload-media/:postId", verifyUser, uploadPostImages);
+
+export default postRouter;

@@ -2,7 +2,7 @@
   "name": "post-management-system",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": ".dist/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --build",
@@ -37,8 +37,10 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nodemailer": "^8.0.1",
+    "redis": "^5.11.0",
     "streamifier": "^0.1.1",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -52,8 +54,12 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
     "@types/nodemailer": "^7.0.11",
+    "@types/redis": "^4.0.10",
     "@types/streamifier": "^0.1.2",
+    "@types/swagger-ui-express": "^4.1.8",
+    "swagger-ui-express": "^5.0.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "winston": "^3.19.0"
   }
 }

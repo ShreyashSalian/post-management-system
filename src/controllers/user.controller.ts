@@ -148,7 +148,7 @@ export const addNewUser = asyncHandler(
         return sendSuccess(
           res,
           CONSTANT_LIST.STATUS_SUCCESS,
-          CONSTANT_LIST.STATUS_CODE_OK,
+          CONSTANT_LIST.STATUS_CODE_CREATED,
           USER_MESSAGES.USER_ADDED,
           userDetail,
         );

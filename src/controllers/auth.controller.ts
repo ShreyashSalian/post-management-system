@@ -1,5 +1,6 @@
 import express from "express";
 import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
 import { asyncHandler, sendError, sendSuccess } from "../utils/function";
 
 import { Types } from "mongoose";
@@ -123,7 +124,8 @@ export const login = asyncHandler(
         user?._id,
       );
       //Save login session
-      const deviceId = uuidv4();
+      // const deviceId = uuidv4();
+      const deviceId = crypto.randomBytes(16).toString("hex");
       await LoginModel.create({
         userId: user?._id,
         deviceId: deviceId,
